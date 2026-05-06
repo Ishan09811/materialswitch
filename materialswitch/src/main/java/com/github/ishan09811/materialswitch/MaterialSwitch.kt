@@ -1,6 +1,8 @@
 
 package com.github.ishan09811.materialswitch
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -25,15 +27,18 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
@@ -45,6 +50,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -150,49 +156,46 @@ fun MaterialSwitch(
             0f
         }
     }
-    val thumbProgressAnimated by animateFloatAsState(
-        targetValue = targetProgressValue,
-        animationSpec = if (isDragging) {
-            tween(durationMillis = 0)
-        } else {
-            spring(dampingRatio = Spring.DampingRatioLowBouncy)
-        },
-    )
-    val colorProgressAnimated by animateFloatAsState(
-        targetValue = targetProgressValue,
-        animationSpec = if (isDragging) {
-            tween(durationMillis = 0)
-        } else {
-            tween(durationMillis = 200)
-        },
-    )
+
+    val progress = remember { Animatable(if (checked) 1f else 0f) }
+
+    LaunchedEffect(targetProgressValue) {
+        progress.animateTo(
+            targetProgressValue,
+            animationSpec = if (isDragging) {
+                tween(0)
+            } else {
+                tween(180, easing = FastOutSlowInEasing)
+            }
+        )
+    }
 
     val thumbProgress by remember {
         derivedStateOf {
             if (isDragging) {
                 dragFloat
             } else {
-                thumbProgressAnimated
+                progress.value
             }
         }
     }
 
-    val trackColor by remember(colorProgressAnimated, enabled) {
+    val trackColor by remember(progress.value, enabled) {
         derivedStateOf {
             lerp(
                 start = colors.trackColor(enabled, false),
                 end = colors.trackColor(enabled, true),
-                fraction = colorProgressAnimated,
+                fraction = progress.value,
             )
         }
     }
 
-    val borderColor by remember(colorProgressAnimated, enabled) {
+    val borderColor by remember(progress.value, enabled) {
         derivedStateOf {
             lerp(
                 start = colors.borderColor(enabled, false),
                 end = colors.borderColor(enabled, true),
-                fraction = colorProgressAnimated,
+                fraction = progress.value,
             )
         }
     }
@@ -210,12 +213,8 @@ fun MaterialSwitch(
     Box(
         modifier = modifier
             .requiredSize(width = SwitchWidth, height = SwitchHeight)
-            .drawBehind {
-                drawRoundRect(
-                    color = trackColor,
-                    cornerRadius = CornerRadius(cornerSizePx),
-                )
-
+            .drawWithCache {
+                val stroke = Stroke(width = outlineWidthPx)
                 val outline = Outline.Rounded(
                     RoundRect(
                         left = halfOutlineWidthPx,
@@ -228,11 +227,21 @@ fun MaterialSwitch(
                         bottomRightCornerRadius = cornerRadius,
                     )
                 )
-                drawOutline(
-                    outline = outline,
-                    color = borderColor,
-                    style = Stroke(width = outlineWidthPx)
-                )
+
+                val cornerRadius = CornerRadius(cornerSizePx)
+
+                onDrawBehind {
+                    drawRoundRect(
+                        color = trackColor,
+                        cornerRadius = cornerRadius,
+                    )
+
+                    drawOutline(
+                        outline = outline,
+                        color = borderColor,
+                        style = stroke
+                    )
+                }
             }
             .draggable2D(
                 state = rememberDraggable2DState { offset ->
@@ -572,4 +581,16 @@ class MaterialSwitchColors(
         result = 31 * result + disabledUncheckedIconColor.hashCode()
         return result
     }
+}
+
+@Preview
+@Composable
+fun MaterialSwitchPreview() {
+    var checked by remember { mutableStateOf(true) }
+    MaterialSwitch(
+        checked = checked,
+        onCheckedChange = {
+            checked = it
+        }
+    )
 }
