@@ -55,7 +55,7 @@ afterEvaluate {
 
                 groupId = "io.github.ishan09811"
                 artifactId = "materialswitch"
-                version = "1.0.1"
+                version = "1.0.2"
             }
         }
     }
