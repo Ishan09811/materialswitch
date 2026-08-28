@@ -1,4 +1,4 @@
-package com.github.ishan09811.materialswitch
+package io.github.ishan09811.materialswitch
 
 import org.junit.Test
 

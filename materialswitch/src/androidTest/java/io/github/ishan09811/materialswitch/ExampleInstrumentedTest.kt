@@ -1,4 +1,4 @@
-package com.github.ishan09811.materialswitch
+package io.github.ishan09811.materialswitch
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

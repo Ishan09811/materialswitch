@@ -1,5 +1,4 @@
-
-package com.github.ishan09811.materialswitch
+package io.github.materialswitch
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -17,11 +16,13 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -402,7 +403,7 @@ class MaterialSwitchColors(
 ) {
     constructor(
         colorScheme: ColorScheme,
-        colors: androidx.compose.material3.SwitchColors,
+        colors: SwitchColors,
     ) : this(
         colorScheme.onPrimary,
         colorScheme.primaryContainer,
@@ -588,6 +589,7 @@ class MaterialSwitchColors(
 fun MaterialSwitchPreview() {
     var checked by remember { mutableStateOf(true) }
     MaterialSwitch(
+        modifier = Modifier.safeContentPadding(),
         checked = checked,
         onCheckedChange = {
             checked = it

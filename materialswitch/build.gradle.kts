@@ -1,13 +1,12 @@
 plugins {
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
     id("maven-publish")
 }
 
 android {
-    namespace = "com.github.ishan09811.materialswitch"
-    compileSdk = 36
+    namespace = "io.github.materialswitch"
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 29
@@ -54,9 +53,9 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 from(components["release"])
 
-                groupId = "com.github.ishan09811"
+                groupId = "io.github.ishan09811"
                 artifactId = "materialswitch"
-                version = "1.0.0"
+                version = "1.0.1"
             }
         }
     }
